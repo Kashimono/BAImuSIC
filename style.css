@@ -1,0 +1,270 @@
+/* =====================================================================
+   BEATBOX OS - style.css
+   =====================================================================
+   SECTIONS (search for the number to jump to it)
+     1. Design tokens (colors, fonts)   6. Home screen
+     2. Page + shell layout             7. DJ screen: mixer, decks, sliders
+     3. Left rail                       8. DJ screen: track list
+     4. Top bar                         9. Animations
+     5. Shared pieces (buttons, panels) 10. Screen switching (:target)
+                                        11. Small screens
+   Design: dark charcoal panels, rounded corners, pale yellow main color
+   (Deck A) and light blue (Deck B), based on the Haulix reference.
+   ===================================================================== */
+
+
+/* ---------- 1. DESIGN TOKENS ----------
+   Change a color here and it changes everywhere. */
+:root{
+  --bg:#121212;          /* page background            */
+  --bg2:#181818;         /* inside of a deck / row     */
+  --panel:#1f1f1f;       /* cards and panels           */
+  --panel2:#262626;      /* hovered / raised surfaces  */
+  --line:rgba(255,255,255,.07);   /* thin borders */
+  --line2:rgba(255,255,255,.13);  /* stronger borders */
+  --fg:#f1f1ee;          /* main text                  */
+  --fg2:#a2a29c;         /* secondary text             */
+  --fg3:#6c6c67;         /* muted text                 */
+  --accent:#f1ee9a;      /* pale yellow: primary button, Deck A */
+  --accent-ink:#1c1b08;  /* dark text on the yellow    */
+  --blue:#7fb6ff;        /* Deck B                     */
+  --amber:#f0b24a; --red:#ef6468; --green:#6fd98f;   /* status colors */
+  --body:'Manrope','Segoe UI',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;  /* numbers / timers */
+  color-scheme:dark;
+}
+
+
+/* ---------- 2. PAGE + SHELL LAYOUT ---------- */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;padding:14px;overflow:hidden;
+  color:var(--fg);font:14px/1.45 var(--body);-webkit-font-smoothing:antialiased;
+  /* faint diagonal pattern like the reference */
+  background:linear-gradient(135deg,rgba(255,255,255,.03) 25%,transparent 25%) 0 0/36px 36px,var(--bg);
+}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}   /* keyboard focus ring */
+[hidden]{display:none!important}
+h1,h2,h3{margin:0}
+
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.s{width:15px;height:15px}                 /* small icon */
+.sub{margin:6px 0 0;color:var(--fg3);font-size:12.5px}
+
+/* The whole OS: rail on the left, everything else on the right */
+.os{height:100%;display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px}
+.main{min-width:0;min-height:0;display:flex;flex-direction:column}
+/* A "view" is one screen (Home or DJ). It scrolls on its own. */
+.view{flex:1;min-height:0;overflow:auto;padding:4px 6px 20px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+
+
+/* ---------- 3. LEFT RAIL ---------- */
+.rail{width:66px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 0;border-radius:24px;background:var(--panel);border:1px solid var(--line)}
+.mark{width:34px;height:34px;display:grid;place-items:center;margin-bottom:14px;color:var(--accent)}
+.mark svg{width:30px;height:30px}
+.rb{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--fg3);transition:background .15s,color .15s}
+.rb:hover{color:var(--fg);background:rgba(255,255,255,.06)}
+/* The active rail button is white. Which one is active is decided in section 10. */
+
+
+/* ---------- 4. TOP BAR ---------- */
+.top{display:flex;align-items:center;gap:10px;padding:2px 6px 14px;min-width:0}
+.chips{display:flex;gap:8px;min-width:0;overflow:hidden}
+.chip{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:11.5px;color:var(--fg3);white-space:nowrap}
+.chip b{color:var(--fg);font-weight:700;font-variant-numeric:tabular-nums}
+.chip b.on{color:var(--green)}                /* "Playing" turns green */
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;height:36px;width:min(300px,34%);padding:0 12px;border-radius:99px;background:var(--panel);border:1px solid var(--line);color:var(--fg3)}
+.search:focus-within{border-color:rgba(241,238,154,.5)}
+.search input{flex:1;min-width:0;border:0;outline:0;background:none;font-size:12.5px}
+.search input::placeholder{color:var(--fg3)}
+.user{display:flex;align-items:center;gap:9px;font-size:12px}
+.user b{display:block;font-weight:700}
+.user small{color:var(--fg3);font-size:11px}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:800 11px var(--body);background:#2e3a1f;color:var(--accent);border:1px solid var(--line2)}
+
+
+/* ---------- 5. SHARED PIECES ---------- */
+.crumbs{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--fg3);margin:0 0 14px}   /* breadcrumb trail */
+.crumbs span{opacity:.6}
+.crumbs b{color:var(--fg);font-weight:600}
+.vhead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 16px;flex-wrap:wrap;margin-bottom:16px}
+h1{font:800 26px/1.15 var(--body);letter-spacing:-.02em}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.btn{height:38px;padding:0 16px;border-radius:99px;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:12.5px;background:var(--panel);border:1px solid var(--line2);white-space:nowrap}
+.btn:hover{background:var(--panel2)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:transparent;font-weight:700}   /* main yellow button */
+.btn.pri:hover{background:#f8f6b8}
+
+.pill{display:inline-flex;align-items:center;height:22px;padding:0 10px;border-radius:99px;font:600 11px var(--body);border:1px solid var(--line2);color:var(--fg2)}
+.pill.blue{color:var(--blue);background:rgba(127,182,255,.1);border-color:rgba(127,182,255,.3)}
+
+.panel{min-width:0;padding:18px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.ph{display:flex;align-items:center;gap:9px;margin-bottom:14px}      /* panel header row */
+.ph h3{font-size:14px;font-weight:700}
+.ph>.ic{color:var(--fg3)}
+.count{margin-left:auto;font-size:11.5px;color:var(--fg3)}
+
+
+/* ---------- 6. HOME SCREEN ---------- */
+.home-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.hero{grid-column:span 3;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;align-items:center;min-height:250px;padding:26px;background:linear-gradient(135deg,#232323,#1b1b1b)}
+.hero h2{font:800 32px/1.1 var(--body);letter-spacing:-.02em;margin:14px 0 8px}
+.hero p{margin:0 0 20px;color:var(--fg2);font-size:13.5px;max-width:38ch}
+.hero-art{position:relative;height:190px}
+.mini{position:absolute;width:150px;height:150px;border-radius:50%;border:1px solid var(--line2);
+  background:repeating-radial-gradient(circle,#161616 0 3px,#202020 3px 6px);   /* vinyl grooves */
+  animation:spin 6s linear infinite}
+.mini::after{content:"";position:absolute;inset:38%;border-radius:50%}          /* center label */
+.mini.a{left:0;top:10px}.mini.a::after{background:var(--accent)}
+.mini.b{right:0;top:36px;animation-duration:8s;animation-direction:reverse}.mini.b::after{background:var(--blue)}
+.steps ol{margin:0;padding-left:18px;display:grid;gap:9px;color:var(--fg2);font-size:12.5px}
+.steps b{color:var(--fg)}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.tile .ic{margin-bottom:10px;color:var(--fg3)}
+.tile b{font-size:14px}
+.tile small{font-size:11.5px;color:var(--fg3)}
+
+
+/* ---------- 7. DJ SCREEN: MIXER, DECKS, SLIDERS ---------- */
+.dj-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:14px;align-items:start}   /* mixer left, tracks right */
+
+/* level meters above the decks */
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:16px}
+.mt-h{font-size:11.5px;color:var(--fg3);margin-bottom:7px}
+.mt-h b{color:var(--fg);font-family:var(--mono);font-weight:500;margin-right:4px}
+.track{height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.fill{display:block;height:100%;width:0;border-radius:99px;transition:width .08s linear}
+.fill.amber{background:linear-gradient(90deg,#c98a1f,var(--amber))}
+.fill.red{background:linear-gradient(90deg,#c24a4e,var(--red))}
+
+/* a single deck */
+.decks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.deck{padding:14px;border-radius:18px;background:var(--bg2);border:1px solid var(--line);min-width:0}
+.deck-h{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.dl{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font:800 12px var(--body);color:#111}   /* "A" / "B" badge */
+.deck[data-d=A] .dl{background:var(--accent)}
+.deck[data-d=B] .dl{background:var(--blue)}
+.dt{min-width:0}
+.dt b,.dt small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dt b{font-size:13px}
+.dt small{color:var(--fg3);font-size:11.5px}
+.bpm{margin-left:auto;text-align:right;font:500 12px var(--mono);color:var(--fg2)}
+.bpm b{display:block;font-size:18px;color:var(--fg);font-weight:500}
+.wave{display:block;width:100%;height:56px;margin-bottom:10px}   /* canvas drawn by script.js */
+
+/* the spinning record */
+.plat-wrap{display:grid;place-items:center;margin:2px 0 12px}
+.plat{width:min(168px,100%);aspect-ratio:1;border-radius:50%;position:relative;border:1px solid var(--line2);
+  background:repeating-radial-gradient(circle,#151515 0 3px,#1e1e1e 3px 6px)}
+.plat::before{content:"";position:absolute;inset:0;border-radius:50%;   /* light reflection */
+  background:conic-gradient(from 0deg,transparent 0 20%,rgba(255,255,255,.07) 25%,transparent 30% 70%,rgba(255,255,255,.07) 75%,transparent 80%)}
+.plat i{position:absolute;inset:34%;border-radius:50%;display:grid;place-items:center}          /* center label */
+.plat i::after{content:"";width:8px;height:8px;border-radius:50%;background:#111}               /* spindle hole */
+.plat i::before{content:"";position:absolute;left:50%;top:6%;width:3px;height:16%;margin-left:-1.5px;border-radius:2px;background:#111}  /* marker so you can see it turn */
+.deck[data-d=A] .plat i{background:var(--accent)}
+.deck[data-d=B] .plat i{background:var(--blue)}
+
+.time{display:flex;justify-content:space-between;font:500 12px var(--mono);color:var(--fg2);margin-bottom:10px;font-variant-numeric:tabular-nums}
+.time b{color:var(--fg);font-weight:500}
+
+/* Play and Cue buttons */
+.ctl{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin-bottom:12px}
+.cb{height:36px;border-radius:99px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;background:var(--panel2);border:1px solid var(--line2)}
+.cb:hover{background:#2f2f2f}
+.cb.play{background:var(--accent);color:var(--accent-ink);border-color:transparent}   /* Deck A play = yellow */
+.deck[data-d=B] .cb.play{background:var(--blue)}                                       /* Deck B play = blue   */
+.cb.play.on{background:#fff;color:#111}                                                /* while playing = white */
+.cb:disabled{opacity:.45;cursor:not-allowed}                                           /* no track loaded yet   */
+
+/* Volume / Pitch rows: label | slider | number */
+.sl{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;margin-top:6px;font-size:11px;color:var(--fg3)}
+.sl output{font:500 11px var(--mono);color:var(--fg2);text-align:right}
+
+/* Sliders. --p (0%-100%) is set by script.js (paintRange) to color the filled part. */
+input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:99px;margin:0;min-width:0;width:100%;cursor:pointer;
+  background:linear-gradient(90deg,#d9d6a0 var(--p,50%),rgba(255,255,255,.12) var(--p,50%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:0;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:0}
+
+/* Crossfader */
+.xf{display:grid;grid-template-columns:20px 1fr 20px;align-items:center;gap:12px;margin-top:16px;padding:0 6px}
+.xl{font:800 12px var(--body);color:var(--fg3);text-align:center}
+.xf-cap{text-align:center;font-size:11px;color:var(--fg3);margin-top:6px}
+#xfade{height:7px;background:linear-gradient(90deg,var(--accent),var(--blue))}   /* yellow (A) to blue (B) */
+
+
+/* ---------- 8. DJ SCREEN: TRACK LIST ----------
+   Each row is a <details> element created by script.js. Click to open. */
+.tlist{display:grid;gap:8px}
+.tr{border-radius:16px;background:var(--bg2);border:1px solid var(--line);overflow:hidden}
+.tr[open]{border-color:var(--line2);background:#222}
+.tr-h{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;cursor:pointer;list-style:none}
+.tr-h::-webkit-details-marker{display:none}
+.tr:not([open]) .tr-h:hover{background:rgba(255,255,255,.03)}
+.cover{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font:800 13px var(--body);color:rgba(0,0,0,.65);
+  background:linear-gradient(140deg,hsl(var(--h) 55% 70%),hsl(calc(var(--h) + 40) 45% 52%))}   /* --h is set per track by script.js */
+.tr b,.tr small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tr b{font-size:13px}
+.tr small{color:var(--fg3);font-size:11.5px}
+.bpmv{font:500 12px var(--mono);color:var(--fg2)}
+.tr-d{padding:2px 12px 12px;display:grid;gap:10px}                    /* expanded details */
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.facts div{font-size:11px;color:var(--fg3)}
+.facts b{margin-top:2px;font-size:12.5px;color:var(--fg)}
+.energy{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-size:11px;color:var(--fg3)}
+.energy .track{height:5px}
+.energy .fill{background:var(--green)}
+.tr-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tr-btns .btn{height:34px;justify-content:center}
+.loaded{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:99px;font:700 10px var(--body);color:#111}   /* "A" / "B" tag on a loaded track */
+.loaded.a{background:var(--accent)}
+.loaded.b{background:var(--blue)}
+.empty{padding:20px;text-align:center;color:var(--fg3);font-size:12.5px}
+
+
+/* ---------- 9. ANIMATIONS ---------- */
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.mini{animation:none}}   /* respect the "reduce motion" setting */
+
+
+/* ---------- 10. SCREEN SWITCHING (no JavaScript) ----------
+   The links in index.html change the URL hash (#v-home or #v-dj).
+   :target matches the element whose id equals the hash. */
+#v-dj{display:none}                          /* DJ screen hidden by default            */
+#v-dj:target{display:block}                  /* ...shown when the URL ends with #v-dj  */
+.main:has(#v-dj:target) #v-home{display:none}/* ...and then Home is hidden             */
+
+/* which rail icon is highlighted */
+.rb-home{background:#fff;color:#111}                                              /* Home active by default */
+.os:has(#v-dj:target) .rb-home{background:none;color:var(--fg3)}                  /* DJ open: Home off      */
+.os:has(#v-dj:target) .rb-home:hover{color:var(--fg);background:rgba(255,255,255,.06)}
+.os:has(#v-dj:target) .rb-dj{background:#fff;color:#111}                          /* DJ open: DJ on         */
+
+
+/* ---------- 11. SMALL SCREENS ---------- */
+@media (max-width:1100px){
+  .dj-grid{grid-template-columns:minmax(0,1fr)}   /* stack mixer above track list */
+  .hide-m{display:none}
+}
+@media (max-width:860px){
+  .home-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero{grid-column:span 2;grid-template-columns:minmax(0,1fr)}
+  .hero-art{display:none}
+  .decks{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:640px){
+  body{padding:8px}
+  .os{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}
+  .main{order:1}
+  .rail{order:2;width:auto;flex-direction:row;justify-content:center;padding:8px 14px;border-radius:99px}
+  .mark{display:none}
+  .chips,.search{display:none}
+  .top{justify-content:flex-end}
+  .meters{grid-template-columns:1fr}
+  h1{font-size:22px}
+}

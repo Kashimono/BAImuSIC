@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BeatBox OS</title>
+
+<!-- Fonts (Google Fonts). If you are offline the page falls back to system fonts. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<!-- All styling lives in style.css -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!--
+  =====================================================================
+  BEATBOX OS - FILE MAP
+  =====================================================================
+  index.html  (this file)  the page structure. Every element the JS needs has an id.
+  style.css                the look: colors, layout, buttons, animations.
+  script.js                the behavior: audio, decks, search, track list.
+
+  PAGE STRUCTURE
+    .os
+     |- nav.rail            left icon bar (Home, DJ Set)
+     |- .main
+         |- header.top      status chips, search box, user
+         |- #v-home         HOME screen (shown first)
+         |- #v-dj           DJ SET screen (decks + track list)
+
+  HOW SCREENS SWITCH
+    No JavaScript is used for this. The links use URL hashes:
+      href="#v-home"  shows Home        href="#v-dj"  shows DJ Set
+    style.css hides #v-dj until the URL ends with #v-dj (the :target rule).
+
+  ID NAMING (A and B are the two decks, shown here for deck A)
+    t-A  track title        a-A  artist line        bpm-A  BPM readout
+    w-A  waveform canvas    p-A  spinning platter
+    cur-A  elapsed time     rem-A  remaining time
+    play-A  play/pause      cue-A  back to start
+    vol-A / vo-A  volume slider / its number
+    pit-A / po-A  pitch slider  / its number
+    barA / lvA    level meter bar / its percent
+    xfade         crossfader (A on the left, B on the right)
+  =====================================================================
+-->
+
+<div class="os">
+
+  <!-- ============ 1. LEFT RAIL (navigation) ============ -->
+  <nav class="rail" aria-label="Main">
+    <div class="mark"><svg viewBox="0 0 24 24"><use href="#i-logo"/></svg></div>
+    <a class="rb rb-home" href="#v-home" aria-label="Home" title="Home"><svg class="ic"><use href="#i-home"/></svg></a>
+    <a class="rb rb-dj" href="#v-dj" aria-label="DJ Set" title="DJ Set"><svg class="ic"><use href="#i-disc"/></svg></a>
+  </nav>
+
+  <div class="main">
+
+    <!-- ============ 2. TOP BAR ============ -->
+    <header class="top">
+      <div class="chips">
+        <!-- Updated by script.js: updateChips() -->
+        <span class="chip">Deck A <b id="chipA">Stopped</b></span>
+        <span class="chip">Deck B <b id="chipB">Stopped</b></span>
+        <span class="chip hide-m">Library <b id="chipLib">8 tracks</b></span>
+      </div>
+      <!-- Typing here filters the track list (script.js: renderList) -->
+      <label class="search">
+        <svg class="ic s"><use href="#i-search"/></svg>
+        <input id="gsearch" type="search" placeholder="Search title, artist or genre" autocomplete="off" aria-label="Search tracks">
+      </label>
+      <div class="user"><span class="av">DJ</span><span class="hide-m"><b>DJ Caleb</b><small>Resident</small></span></div>
+    </header>
+
+    <!-- ============ 3. HOME SCREEN ============ -->
+    <section class="view" id="v-home">
+      <div class="crumbs"><svg class="ic s"><use href="#i-home"/></svg>Home</div>
+      <div class="vhead">
+        <div><h1>Welcome back, DJ</h1><p class="sub">Your two-deck mixer is ready.</p></div>
+      </div>
+
+      <div class="home-grid">
+        <!-- Big card: the main way into the DJ set -->
+        <article class="panel hero">
+          <div class="hero-text">
+            <span class="pill blue">Ready</span>
+            <h2>DJ Set</h2>
+            <p>Two decks, a crossfader and your track list. Load a song on each side and mix.</p>
+            <a class="btn pri" href="#v-dj"><svg class="ic s"><use href="#i-play"/></svg>Open DJ Set</a>
+          </div>
+          <!-- Decorative spinning records (pure CSS) -->
+          <div class="hero-art" aria-hidden="true"><span class="mini a"></span><span class="mini b"></span></div>
+        </article>
+
+        <!-- Quick start help card -->
+        <article class="panel steps">
+          <div class="ph"><svg class="ic s"><use href="#i-music"/></svg><h3>Quick start</h3></div>
+          <ol>
+            <li>Open the DJ Set.</li>
+            <li>Pick a track, press <b>Load to A</b> or <b>Load to B</b>.</li>
+            <li>Press <b>Play</b> on each deck.</li>
+            <li>Slide the <b>crossfader</b> to blend.</li>
+          </ol>
+        </article>
+
+        <!-- Info tiles (not clickable) -->
+        <div class="panel tile"><svg class="ic"><use href="#i-music"/></svg><b>Library</b><small>8 tracks</small></div>
+        <div class="panel tile"><svg class="ic"><use href="#i-disc"/></svg><b>Decks</b><small>2 decks ready</small></div>
+        <div class="panel tile"><svg class="ic"><use href="#i-mic"/></svg><b>Crossfader</b><small>Blend A and B</small></div>
+        <div class="panel tile"><svg class="ic"><use href="#i-cue"/></svg><b>Pitch</b><small>Speed up or slow down 8%</small></div>
+      </div>
+    </section>
+
+    <!-- ============ 4. DJ SET SCREEN ============ -->
+    <section class="view" id="v-dj">
+      <div class="crumbs">
+        <svg class="ic s"><use href="#i-home"/></svg>Home<span>›</span>DJ Set<span>›</span><b>Mix 01</b>
+      </div>
+      <div class="vhead">
+        <div><h1>Mix 01</h1><p class="sub">Two-deck mixer</p></div>
+        <div class="actions"><a class="btn" href="#v-home"><svg class="ic s"><use href="#i-home"/></svg>Home</a></div>
+      </div>
+
+      <div class="dj-grid">
+
+        <!-- ---- 4a. MIXER PANEL: level meters, two decks, crossfader ---- -->
+        <article class="panel mixer">
+          <div class="ph"><svg class="ic s"><use href="#i-disc"/></svg><h3>Deck Mixer</h3></div>
+
+          <!-- Level meters: fill width is set by script.js while audio plays -->
+          <div class="meters">
+            <div class="mt"><div class="mt-h"><b id="lvA">0%</b> Deck A level</div><div class="track"><i id="barA" class="fill amber"></i></div></div>
+            <div class="mt"><div class="mt-h"><b id="lvB">0%</b> Deck B level</div><div class="track"><i id="barB" class="fill red"></i></div></div>
+          </div>
+
+          <div class="decks">
+
+            <!-- ======== DECK A ======== -->
+            <div class="deck" data-d="A">
+              <div class="deck-h">
+                <span class="dl">A</span>
+                <div class="dt"><b id="t-A">No track</b><small id="a-A">Load a track from the list</small></div>
+                <div class="bpm"><b id="bpm-A">--</b>BPM</div>
+              </div>
+              <canvas class="wave" id="w-A" aria-label="Deck A waveform"></canvas>
+              <div class="plat-wrap"><div class="plat" id="p-A"><i></i></div></div>
+              <div class="time"><span><b id="cur-A">0:00</b> elapsed</span><span id="rem-A">-0:00</span></div>
+              <div class="ctl">
+                <button class="cb play" id="play-A" type="button" data-deck="A"></button>
+                <button class="cb" id="cue-A" type="button" data-deck="A"><svg class="ic s"><use href="#i-cue"/></svg>Cue</button>
+              </div>
+              <label class="sl">Volume<input type="range" id="vol-A" min="0" max="100" value="80"><output id="vo-A">80</output></label>
+              <label class="sl">Pitch<input type="range" id="pit-A" min="-80" max="80" value="0"><output id="po-A">0.0%</output></label>
+            </div>
+
+            <!-- ======== DECK B (same layout, ids end in B) ======== -->
+            <div class="deck" data-d="B">
+              <div class="deck-h">
+                <span class="dl">B</span>
+                <div class="dt"><b id="t-B">No track</b><small id="a-B">Load a track from the list</small></div>
+                <div class="bpm"><b id="bpm-B">--</b>BPM</div>
+              </div>
+              <canvas class="wave" id="w-B" aria-label="Deck B waveform"></canvas>
+              <div class="plat-wrap"><div class="plat" id="p-B"><i></i></div></div>
+              <div class="time"><span><b id="cur-B">0:00</b> elapsed</span><span id="rem-B">-0:00</span></div>
+              <div class="ctl">
+                <button class="cb play" id="play-B" type="button" data-deck="B"></button>
+                <button class="cb" id="cue-B" type="button" data-deck="B"><svg class="ic s"><use href="#i-cue"/></svg>Cue</button>
+              </div>
+              <label class="sl">Volume<input type="range" id="vol-B" min="0" max="100" value="80"><output id="vo-B">80</output></label>
+              <label class="sl">Pitch<input type="range" id="pit-B" min="-80" max="80" value="0"><output id="po-B">0.0%</output></label>
+            </div>
+          </div>
+
+          <!-- Crossfader: far left = only A, far right = only B -->
+          <div class="xf"><span class="xl">A</span><input type="range" id="xfade" min="0" max="100" value="50" aria-label="Crossfader"><span class="xl">B</span></div>
+          <div class="xf-cap">Crossfader</div>
+        </article>
+
+        <!-- ---- 4b. TRACK LIST PANEL: rows are created by script.js (renderList) ---- -->
+        <article class="panel list">
+          <div class="ph"><svg class="ic s"><use href="#i-music"/></svg><h3>Tracks</h3><span class="count" id="count"></span></div>
+          <div class="tlist" id="tlist"></div>
+        </article>
+
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ============ ICON SPRITE ============
+     Icons are drawn once here and reused with: <svg><use href="#i-name"/></svg> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-logo" viewBox="0 0 24 24"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11 12 3l9 8M5 9.5V21h5v-6h4v6h5V9.5"/></symbol>
+<symbol id="i-disc" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></symbol>
+<symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3zM20 16a3 3 0 1 1-3-3 3 3 0 0 1 3 3z"/></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24"><path d="M4 12h3M10 7v10M14 4v16M18 8v8M21 12h-1"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.5-4.5"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M6.5 4.5h3.8v15H6.5zM13.7 4.5h3.8v15h-3.8z" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-cue" viewBox="0 0 24 24"><path d="M5 20V4M9 5l11 7-11 7z"/></symbol>
+</defs></svg>
+
+<script src="script.js"></script>
+</body>
+</html>
